@@ -17,6 +17,9 @@ A Spotify-style instrumental music player for focus and flow. Built as a static 
 | 9 | Chill Funk Deep Bass | Retro Instrumental · Everyday Groovin' |
 | 10 | The Ultimate Mix: Funk × R&B × Jazz | Funk / R&B / Jazz · Background Mix |
 | 11 | AUD-20220726 | Recording |
+| 12 | Instrumental Blues — 2 Hour Compilation | Blues Instrumental · 2 hrs |
+| 13 | Mayelevator Vol. 2 — John Mayer Instrumental | Instrumental · Elevator / Chill |
+| 14 | Mayelevator Vol. 1 — John Mayer Instrumental | Instrumental · Elevator / Chill |
 
 > **Note:** MP3 files are excluded from this repo (too large for GitHub). Add your own to `audio/` matching the filenames in `app.js`.
 

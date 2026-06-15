@@ -68,6 +68,24 @@ const TRACKS = [
     name: 'AUD-20220726',
     genre: 'Recording',
   },
+  {
+    id: 12,
+    file: 'audio/Instrumental-Blues-Two-Hour-Compilation.mp3',
+    name: 'Instrumental Blues — 2 Hour Compilation',
+    genre: 'Blues Instrumental · 2 hrs',
+  },
+  {
+    id: 13,
+    file: 'audio/Mayelevator-Vol-2-John-Mayer-Instrumental.mp3',
+    name: 'Mayelevator Vol. 2 — John Mayer Instrumental',
+    genre: 'Instrumental · Elevator / Chill',
+  },
+  {
+    id: 14,
+    file: 'audio/Mayelevator-Vol-1-John-Mayer-Instrumental.mp3',
+    name: 'Mayelevator Vol. 1 — John Mayer Instrumental',
+    genre: 'Instrumental · Elevator / Chill',
+  },
 ];
 
 // ─────────────────────────────────────────────────
