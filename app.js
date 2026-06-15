@@ -1,90 +1,92 @@
 // ─────────────────────────────────────────────────
+//  Audio Source
+// ─────────────────────────────────────────────────
+// Tracks stream directly from the public S3 bucket. `key` is the exact
+// S3 object key under Instrumental/. Audio never gets bundled into the deploy.
+const AUDIO_BASE = 'https://groovestationmacro.s3.ca-central-1.amazonaws.com/Instrumental/';
+function trackUrl(key) { return AUDIO_BASE + encodeURIComponent(key); }
+
+// ─────────────────────────────────────────────────
 //  Track Library
 // ─────────────────────────────────────────────────
 const TRACKS = [
   {
     id: 1,
-    file: 'audio/The-Best-of-Acid-Jazz-and-Funk-1-Hours-and-Half-of-Non-Stop-Music.mp3',
+    key: 'The Best of Acid Jazz and Funk - 1 Hours and Half of Non Stop Music.mp3',
     name: 'The Best of Acid Jazz & Funk',
     genre: 'Acid Jazz · 1½ hrs',
   },
   {
     id: 2,
-    file: 'audio/Funk-Jazz-Instrumentals-2.mp3',
+    key: 'Funk Jazz Instrumentals.mp3',
     name: 'Funk Jazz Instrumentals',
     genre: 'Funk Jazz',
   },
   {
     id: 3,
-    file: 'audio/Nostalgic-Jazz-Funk-Ride-1-Hour-Retro-Pocket-Bliss-70s-80s-Fusion-4.mp3',
+    key: 'Nostalgic Jazz Funk Ride： 1 Hour Retro Pocket Bliss (70s-80s Fusion).mp3',
     name: 'Nostalgic Jazz-Funk Ride',
     genre: '70s/80s Fusion · Retro Pocket Bliss',
   },
   {
     id: 4,
-    file: 'audio/Best-Acid-Jazz-Funky-Instrumentals-Vol.-4-True-Relaxation-and-Joy-6.mp3',
+    key: 'Best Acid Jazz & Funky Instrumentals Vol. 4 ｜ True Relaxation and Joy.mp3',
     name: 'Best Acid Jazz Funky Instrumentals Vol. 4',
     genre: 'Acid Jazz · True Relaxation & Joy',
   },
   {
     id: 5,
-    file: 'audio/Best-Acid-Jazz-Funky-Instrumentals-Vol.-2-True-Relaxation-and-Joy-7.mp3',
+    key: 'Best Acid Jazz & Funky Instrumentals Vol. 2 ｜ True Relaxation and Joy.mp3',
     name: 'Best Acid Jazz Funky Instrumentals Vol. 2',
     genre: 'Acid Jazz · True Relaxation & Joy',
   },
   {
     id: 6,
-    file: 'audio/Best-Acid-Jazz-Funky-Instrumentals-Vol.-3-True-Relaxation-and-Joy-8.mp3',
+    key: 'Best Acid Jazz & Funky Instrumentals Vol. 3 ｜ True Relaxation and Joy.mp3',
     name: 'Best Acid Jazz Funky Instrumentals Vol. 3',
     genre: 'Acid Jazz · True Relaxation & Joy',
   },
   {
     id: 7,
-    file: 'audio/Funk-Soul-Music-Instrumental-Playlist-Background-Funk-Soul-Mix-for-Studying-Working-Relax-9.mp3',
+    key: 'Funk Soul Music Instrumental Playlist ｜ Background Funk Soul Mix for Studying, Working, Relax.mp3',
     name: 'Funk Soul Instrumental Mix',
     genre: 'Funk Soul · Study & Work',
   },
   {
     id: 8,
-    file: 'audio/Cruella_Original_Score_Complete-10.mp3',
+    key: 'Cruella_Original_Score_Complete.mp3',
     name: 'Cruella — Original Score (Complete)',
     genre: 'Cinematic · Orchestral Score',
   },
   {
     id: 9,
-    file: 'audio/Chill-Funk-Deep-Bass-for-Everyday-Groovin-1-Hour-Retro-Instrumental-Vibes-11.mp3',
+    key: 'Chill Funk Deep Bass for Everyday Groovin\' ♫ 1 Hour Retro Instrumental Vibes.mp3',
     name: 'Chill Funk Deep Bass',
     genre: 'Retro Instrumental · Everyday Groovin\'',
   },
   {
     id: 10,
-    file: 'audio/The-Ultimate-Mix-Funk-x-R-B-Jazz-Relaxing-Background-Music-12.mp3',
+    key: '✨The Ultimate Mix ｜ Funk x R&B & Jazz ｜ Relaxing Background Music.mp3',
     name: 'The Ultimate Mix: Funk × R&B × Jazz',
     genre: 'Funk / R&B / Jazz · Background Mix',
   },
   {
     id: 11,
-    file: 'audio/AUD-20220726-WA0014-13.mp3',
+    key: 'AUD-20220726-WA0014.mp3',
     name: 'AUD-20220726',
     genre: 'Recording',
   },
   {
     id: 12,
-    file: 'audio/Instrumental-Blues-Two-Hour-Compilation.mp3',
-    name: 'Instrumental Blues — 2 Hour Compilation',
-    genre: 'Blues Instrumental · 2 hrs',
+    key: 'CHILL FUNK Lounge - 3 Hours of Deep Bass Vibe ♫ Instrumental Mix for Chill & Relax.mp3',
+    name: 'Chill Funk Lounge',
+    genre: 'Deep Bass · 3 hrs Chill & Relax',
   },
   {
     id: 13,
-    file: 'audio/Mayelevator-Vol-2-John-Mayer-Instrumental.mp3',
-    name: 'Mayelevator Vol. 2 — John Mayer Instrumental',
-    genre: 'Instrumental · Elevator / Chill',
-  },
-  {
-    id: 14,
-    file: 'audio/Mayelevator-Vol-1-John-Mayer-Instrumental.mp3',
-    name: 'Mayelevator Vol. 1 — John Mayer Instrumental',
-    genre: 'Instrumental · Elevator / Chill',
+    key: '2 Hours of Smooth & Groovy Instrumental Jazz - Music for Work, Study or Relaxing.mp3',
+    name: 'Smooth & Groovy Instrumental Jazz',
+    genre: 'Smooth Jazz · 2 hrs Work & Study',
   },
 ];
 
@@ -148,7 +150,7 @@ function loadDurations(tracks) {
   tracks.forEach(track => {
     const probe = new Audio();
     probe.preload = 'metadata';
-    probe.src = track.file;
+    probe.src = trackUrl(track.key);
     probe.addEventListener('loadedmetadata', () => {
       const el = document.getElementById(`dur-${track.id}`);
       if (el) el.textContent = formatTime(probe.duration);
@@ -164,7 +166,7 @@ function playTrack(idx) {
   currentIndex = idx;
   const track = displayedTracks[idx];
 
-  audio.src = track.file;
+  audio.src = trackUrl(track.key);
   audio.volume = isMuted ? 0 : volume;
   audio.play().catch(() => {});
 

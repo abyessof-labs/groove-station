@@ -17,11 +17,16 @@ A Spotify-style instrumental music player for focus and flow. Built as a static 
 | 9 | Chill Funk Deep Bass | Retro Instrumental · Everyday Groovin' |
 | 10 | The Ultimate Mix: Funk × R&B × Jazz | Funk / R&B / Jazz · Background Mix |
 | 11 | AUD-20220726 | Recording |
-| 12 | Instrumental Blues — 2 Hour Compilation | Blues Instrumental · 2 hrs |
-| 13 | Mayelevator Vol. 2 — John Mayer Instrumental | Instrumental · Elevator / Chill |
-| 14 | Mayelevator Vol. 1 — John Mayer Instrumental | Instrumental · Elevator / Chill |
+| 12 | Chill Funk Lounge | Deep Bass · 3 hrs Chill & Relax |
+| 13 | Smooth & Groovy Instrumental Jazz | Smooth Jazz · 2 hrs Work & Study |
 
-> **Note:** MP3 files are excluded from this repo (too large for GitHub). Add your own to `audio/` matching the filenames in `app.js`.
+> **Audio source:** Tracks stream directly from the public S3 bucket
+> `groovestationmacro/Instrumental/` (account 791327541706, region ca-central-1).
+> No MP3s are bundled into the deploy. Each track's `key` in `app.js` is the exact
+> S3 object key; the player builds the URL via `AUDIO_BASE + encodeURIComponent(key)`.
+>
+> _The 3 John Mayer / Instrumental Blues YouTube tracks are pending — they couldn't be
+> fetched (YouTube blocks the build environment). Add them to S3, then to `app.js`._
 
 ## Features
 
@@ -39,17 +44,17 @@ A Spotify-style instrumental music player for focus and flow. Built as a static 
 
 ## Adding New Tracks
 
-1. Drop the MP3 into `audio/`
-2. Add an entry to the `TRACKS` array in `app.js`:
+1. Upload the MP3 to the S3 bucket `groovestationmacro/Instrumental/`
+2. Add an entry to the `TRACKS` array in `app.js` (use the EXACT S3 object key):
    ```js
    {
-     id: 12,
-     file: 'audio/your-file.mp3',
+     id: 14,
+     key: 'Your Exact S3 Filename.mp3',
      name: 'Display Name',
      genre: 'Genre · Description',
    }
    ```
-3. Re-deploy
+3. Re-deploy (code-only — fast, no audio bundled) and push to GitHub
 
 ## Stack
 
