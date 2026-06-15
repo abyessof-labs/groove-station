@@ -358,6 +358,47 @@ function playTrack(idx) {
 function updateNowPlaying(track) {
   document.getElementById('np-title').textContent = track.name;
   document.getElementById('np-artist').textContent = track.genre;
+  updateMediaSessionMetadata(track);
+}
+
+// ─────────────────────────────────────────────────
+//  Media Session API — OS / hardware media keys
+// ─────────────────────────────────────────────────
+function updateMediaSessionMetadata(track) {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: track.name,
+      artist: track.genre,
+      album: 'Groove Station',
+      artwork: [
+        { src: 'cover-96.png', sizes: '96x96', type: 'image/png' },
+        { src: 'cover.png', sizes: '512x512', type: 'image/png' },
+      ],
+    });
+  } catch (e) { /* MediaMetadata unsupported */ }
+}
+
+function setupMediaSession() {
+  if (!('mediaSession' in navigator)) return;
+  const ms = navigator.mediaSession;
+  const safe = (action, fn) => {
+    try { ms.setActionHandler(action, fn); } catch (e) { /* action unsupported */ }
+  };
+  safe('play', () => { if (!isPlaying) togglePlay(); });
+  safe('pause', () => { if (isPlaying) togglePlay(); });
+  safe('previoustrack', () => playPrev());
+  safe('nexttrack', () => playNext());
+  safe('stop', () => { audio.pause(); isPlaying = false; updatePlayIcons(); updateTrackListActive(currentIndex); updateMediaSessionState(); });
+  // Seek support (some keyboards / OS controls expose these)
+  safe('seekbackward', (d) => { audio.currentTime = Math.max(0, audio.currentTime - (d.seekOffset || 10)); });
+  safe('seekforward', (d) => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (d.seekOffset || 10)); });
+  safe('seekto', (d) => { if (d.fastSeek && 'fastSeek' in audio) { audio.fastSeek(d.seekTime); } else { audio.currentTime = d.seekTime; } });
+}
+
+function updateMediaSessionState() {
+  if (!('mediaSession' in navigator)) return;
+  try { navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused'; } catch (e) {}
 }
 
 // Reflect the now-playing track's favorite state in the player-bar heart
@@ -390,6 +431,7 @@ function updatePlayIcons() {
     playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
     playHeroIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
   }
+  updateMediaSessionState();
 }
 
 function togglePlay() {
@@ -646,3 +688,4 @@ function formatTime(sec) {
 setVolume(0.7);
 updateFavCount();
 applyView();
+setupMediaSession();
