@@ -345,7 +345,7 @@ body {
 ────────────────────────────────────────────── */
 .track-list-header {
   display: grid;
-  grid-template-columns: 40px 1fr 60px;
+  grid-template-columns: 40px 1fr 40px 60px;
   gap: 8px;
   align-items: center;
   padding: 4px 24px 8px;
@@ -370,7 +370,7 @@ body {
 
 .track-item {
   display: grid;
-  grid-template-columns: 40px 1fr 60px;
+  grid-template-columns: 40px 1fr 40px 60px;
   gap: 8px;
   align-items: center;
   padding: 8px 16px;
@@ -381,6 +381,27 @@ body {
 }
 
 .track-item:hover { background: var(--bg-hover); }
+
+/* Per-row favorite heart */
+.row-heart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity var(--transition), color var(--transition), transform var(--transition);
+}
+.row-heart svg { fill: none; stroke: currentColor; stroke-width: 2; }
+.track-item:hover .row-heart { opacity: 1; }
+.row-heart:hover { color: var(--text-primary); transform: scale(1.12); }
+.row-heart.liked { opacity: 1; color: var(--accent); }
+.row-heart.liked svg { fill: var(--accent); stroke: var(--accent); }
 .track-item.active { background: var(--bg-card); }
 
 .track-num {
@@ -677,3 +698,30 @@ body {
    Hidden state
 ────────────────────────────────────────────── */
 .hidden { display: none !important; }
+
+/* ──────────────────────────────────────────────
+   Favorites — sidebar + empty state
+────────────────────────────────────────────── */
+.playlist-card { cursor: pointer; }
+.playlist-card.active { background: var(--bg-card); }
+.playlist-card.active .playlist-name { color: var(--accent); }
+
+.favorites-icon {
+  background: linear-gradient(135deg, #ff5a7e 0%, #c4344f 100%);
+  color: #fff;
+}
+.favorites-icon svg { fill: #fff; }
+
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--text-secondary);
+}
+.empty-state svg { color: var(--accent); opacity: 0.7; margin-bottom: 16px; }
+.empty-state h3 {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: var(--text-lg, 20px);
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+.empty-state p { margin: 0; font-size: var(--text-sm); }

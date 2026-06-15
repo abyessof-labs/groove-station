@@ -19,6 +19,19 @@ A Spotify-style instrumental music player for focus and flow. Built as a static 
 | 11 | AUD-20220726 | Recording |
 | 12 | Chill Funk Lounge | Deep Bass · 3 hrs Chill & Relax |
 | 13 | Smooth & Groovy Instrumental Jazz | Smooth Jazz · 2 hrs Work & Study |
+| 14 | Instrumental Blues — 2 Hour Compilation | Blues Instrumental · 2 hrs |
+| 15 | Mayelevator Vol. 1 — John Mayer Instrumental | Instrumental · Elevator / Chill |
+| 16 | Mayelevator Vol. 2 — John Mayer Instrumental | Instrumental · Elevator / Chill |
+| 17 | No Such Thing (Instrumental) | John Mayer · Instrumental Cover |
+| 18 | Heartbreak Warfare (Instrumental) | John Mayer · Karaoke / Instrumental |
+| 19 | Video Games | John Mayer · Instrumental |
+| 20 | Human Nature (Instrumental) | John Mayer · Instrumental |
+| 21 | Who Says (Karaoke) | John Mayer · Karaoke / Instrumental |
+| 22 | Neon (Instrumental Cover) | Pontus Cederholm · John Mayer Cover |
+| 23 | Clarity (Cover/Instrumental) | John Mayer · Instrumental Cover |
+| 24 | Stop This Train (Acoustic Instrumental) | John Mayer · Acoustic Cover |
+| 25 | Shadow Days (Instrumental/Karaoke) | John Mayer · Karaoke / Instrumental |
+| 26 | Daughters (Acoustic Karaoke) | John Mayer · Karaoke / Instrumental |
 
 > **Audio source:** Tracks stream directly from the public S3 bucket
 > `groovestationmacro/Instrumental/` (account 791327541706, region ca-central-1).
@@ -31,6 +44,7 @@ A Spotify-style instrumental music player for focus and flow. Built as a static 
 ## Features
 
 - Play / pause / previous / next
+- **Favorites** — tap the heart on any track (or the player bar) to like it; a Favorites view in the sidebar shows your liked songs. Persisted in the browser via localStorage.
 - Shuffle and repeat modes (off / all / one)
 - Progress bar scrubbing
 - Volume control with mute

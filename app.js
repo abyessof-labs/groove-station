@@ -1,8 +1,9 @@
 // ─────────────────────────────────────────────────
 //  Audio Source
 // ─────────────────────────────────────────────────
-// Tracks stream directly from the public S3 bucket. `key` is the exact
-// S3 object key under Instrumental/. Audio never gets bundled into the deploy.
+// Tracks stream directly from the public S3 bucket. `key` is the EXACT
+// S3 object key under Instrumental/ (some contain mojibake from upload —
+// they must match S3 byte-for-byte). Audio is never bundled into the deploy.
 const AUDIO_BASE = 'https://groovestationmacro.s3.ca-central-1.amazonaws.com/Instrumental/';
 function trackUrl(key) { return AUDIO_BASE + encodeURIComponent(key); }
 
@@ -88,6 +89,84 @@ const TRACKS = [
     name: 'Smooth & Groovy Instrumental Jazz',
     genre: 'Smooth Jazz · 2 hrs Work & Study',
   },
+  {
+    id: 14,
+    key: 'Instrumental Blues - 2 Hour Compilation.mp3',
+    name: 'Instrumental Blues — 2 Hour Compilation',
+    genre: 'Blues Instrumental · 2 hrs',
+  },
+  {
+    id: 15,
+    key: 'Mayelevator Vol. 1 - John Mayer Instrumental.mp3',
+    name: 'Mayelevator Vol. 1 — John Mayer Instrumental',
+    genre: 'Instrumental · Elevator / Chill',
+  },
+  {
+    id: 16,
+    key: 'Mayelevator Vol. 2 - John Mayer Instrumental.mp3',
+    name: 'Mayelevator Vol. 2 — John Mayer Instrumental',
+    genre: 'Instrumental · Elevator / Chill',
+  },
+  {
+    id: 17,
+    key: 'John Mayer - No Such Thing (Instrumental).mp3',
+    name: 'No Such Thing (Instrumental)',
+    genre: 'John Mayer · Instrumental Cover',
+  },
+  {
+    id: 18,
+    key: 'Heartbreak warfare Karaoke (instrumental) - John Mayer.mp3',
+    name: 'Heartbreak Warfare (Instrumental)',
+    genre: 'John Mayer · Karaoke / Instrumental',
+  },
+  {
+    id: 19,
+    key: 'John Mayer - Video Games.mp3',
+    name: 'Video Games',
+    genre: 'John Mayer · Instrumental',
+  },
+  {
+    id: 20,
+    key: 'John Mayer performs an instrumental version of Human Nature.mp3',
+    name: 'Human Nature (Instrumental)',
+    genre: 'John Mayer · Instrumental',
+  },
+  {
+    id: 21,
+    key: 'John Mayer - Who Says (Karaoke).mp3',
+    name: 'Who Says (Karaoke)',
+    genre: 'John Mayer · Karaoke / Instrumental',
+  },
+  {
+    id: 22,
+    key: 'Pontus Cederholm - Neon (Instrumental John Mayer Cover).mp3',
+    name: 'Neon (Instrumental Cover)',
+    genre: 'Pontus Cederholm · John Mayer Cover',
+  },
+  {
+    id: 23,
+    key: 'John Mayer - Clarity [CoverΓº╕Instrumental].mp3',
+    name: 'Clarity (Cover/Instrumental)',
+    genre: 'John Mayer · Instrumental Cover',
+  },
+  {
+    id: 24,
+    key: 'John Mayer - Stop this train ( acoustic cover Γº╕ instrumental ).mp3',
+    name: 'Stop This Train (Acoustic Instrumental)',
+    genre: 'John Mayer · Acoustic Cover',
+  },
+  {
+    id: 25,
+    key: 'John Mayer - Shadow Days (INSTRUMENTALΓº╕KARAOKE).mp3',
+    name: 'Shadow Days (Instrumental/Karaoke)',
+    genre: 'John Mayer · Karaoke / Instrumental',
+  },
+  {
+    id: 26,
+    key: 'John Mayer - Daughters - acoustic karaoke version Γº╕ visual lesson ;p.mp3',
+    name: 'Daughters (Acoustic Karaoke)',
+    genre: 'John Mayer · Karaoke / Instrumental',
+  },
 ];
 
 // ─────────────────────────────────────────────────
@@ -102,6 +181,30 @@ let isMuted = false;
 let isDraggingProgress = false;
 let displayedTracks = [...TRACKS];
 let shuffleOrder = [];
+let currentView = 'all';        // 'all' | 'favorites'
+let searchQuery = '';
+let playingTrackId = null;      // id of the track currently loaded in the player
+
+// ── Favorites (persisted in browser localStorage) ──
+const FAV_KEY = 'grooveStationFavorites';
+function loadFavorites() {
+  try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY)) || []); }
+  catch (e) { return new Set(); }
+}
+function saveFavorites() {
+  try { localStorage.setItem(FAV_KEY, JSON.stringify([...favorites])); } catch (e) {}
+}
+let favorites = loadFavorites();
+function isFav(id) { return favorites.has(id); }
+function toggleFav(id) {
+  if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
+  saveFavorites();
+  updateFavCount();
+}
+function updateFavCount() {
+  const el = document.getElementById('fav-count');
+  if (el) el.textContent = favorites.size;
+}
 
 const audio = document.getElementById('audio-engine');
 
@@ -118,6 +221,7 @@ function renderTracks(tracks) {
     li.dataset.index = idx;
     li.dataset.id = track.id;
 
+    const liked = isFav(track.id);
     li.innerHTML = `
       <div class="track-num">
         <span class="num-text">${idx + 1}</span>
@@ -129,16 +233,89 @@ function renderTracks(tracks) {
         <span class="track-name">${escHtml(track.name)}</span>
         <span class="track-genre">${escHtml(track.genre)}</span>
       </div>
+      <button class="row-heart${liked ? ' liked' : ''}" data-id="${track.id}" title="${liked ? 'Remove from Favorites' : 'Add to Favorites'}" aria-label="Toggle favorite">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </button>
       <span class="track-duration" id="dur-${track.id}">—</span>
     `;
 
-    li.addEventListener('click', () => playTrack(idx));
+    li.addEventListener('click', (e) => {
+      if (e.target.closest('.row-heart')) return;  // don't play when toggling heart
+      playTrack(idx);
+    });
+    const heart = li.querySelector('.row-heart');
+    heart.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFav(track.id);
+      heart.classList.toggle('liked');
+      heart.title = heart.classList.contains('liked') ? 'Remove from Favorites' : 'Add to Favorites';
+      syncPlayerHeart();
+      if (currentView === 'favorites') applyView();  // drop it out of the favorites list live
+    });
     list.appendChild(li);
   });
 
-  document.getElementById('track-count').textContent = tracks.length;
+  document.getElementById('track-count').textContent = TRACKS.length;
   document.getElementById('hero-count').textContent = `${tracks.length} song${tracks.length !== 1 ? 's' : ''}`;
+  updateFavCount();
   loadDurations(tracks);
+}
+
+// ─────────────────────────────────────────────────
+//  Views (All / Favorites) + Search
+// ─────────────────────────────────────────────────
+function baseViewTracks() {
+  return currentView === 'favorites' ? TRACKS.filter(t => isFav(t.id)) : [...TRACKS];
+}
+
+function applyView() {
+  let list = baseViewTracks();
+  if (searchQuery) {
+    list = list.filter(t =>
+      t.name.toLowerCase().includes(searchQuery) ||
+      t.genre.toLowerCase().includes(searchQuery));
+  }
+  displayedTracks = list;
+  renderTracks(displayedTracks);
+
+  // Update hero text for the active view
+  const heroTitle = document.querySelector('.hero-title');
+  const heroType = document.querySelector('.hero-type');
+  const heroDesc = document.querySelector('.hero-desc');
+  const empty = document.getElementById('empty-state');
+  if (currentView === 'favorites') {
+    if (heroType) heroType.textContent = 'PLAYLIST';
+    if (heroTitle) heroTitle.textContent = 'Favorites';
+    if (heroDesc) heroDesc.textContent = 'Your liked instrumental tracks.';
+  } else {
+    if (heroType) heroType.textContent = 'PLAYLIST';
+    if (heroTitle) heroTitle.textContent = 'Instrumental Grooves';
+    if (heroDesc) heroDesc.textContent = 'Acid jazz, funk soul, and cinematic beats for focus and flow.';
+  }
+
+  // Empty state for favorites
+  if (empty) {
+    const showEmpty = currentView === 'favorites' && displayedTracks.length === 0 && !searchQuery;
+    empty.style.display = showEmpty ? 'block' : 'none';
+  }
+
+  // Re-highlight currently playing track if still visible
+  if (currentIndex >= 0) {
+    const cur = TRACKS[currentIndex] || displayedTracks[currentIndex];
+  }
+  const playingId = playingTrackId;
+  if (playingId != null) {
+    const i = displayedTracks.findIndex(t => t.id === playingId);
+    if (i >= 0) updateTrackListActive(i);
+  }
+}
+
+function switchView(view) {
+  currentView = view;
+  // sidebar active state
+  document.querySelectorAll('.playlist-card[data-view]').forEach(c =>
+    c.classList.toggle('active', c.dataset.view === view));
+  applyView();
 }
 
 function escHtml(str) {
@@ -165,6 +342,7 @@ function playTrack(idx) {
   if (idx < 0 || idx >= displayedTracks.length) return;
   currentIndex = idx;
   const track = displayedTracks[idx];
+  playingTrackId = track.id;
 
   audio.src = trackUrl(track.key);
   audio.volume = isMuted ? 0 : volume;
@@ -174,11 +352,21 @@ function playTrack(idx) {
   updateNowPlaying(track);
   updateTrackListActive(idx);
   updatePlayIcons();
+  syncPlayerHeart();
 }
 
 function updateNowPlaying(track) {
   document.getElementById('np-title').textContent = track.name;
   document.getElementById('np-artist').textContent = track.genre;
+}
+
+// Reflect the now-playing track's favorite state in the player-bar heart
+function syncPlayerHeart() {
+  const btn = document.getElementById('heart-btn');
+  if (!btn) return;
+  const liked = playingTrackId != null && isFav(playingTrackId);
+  btn.classList.toggle('liked', liked);
+  btn.title = liked ? 'Remove from Favorites' : 'Add to Favorites';
 }
 
 function updateTrackListActive(idx) {
@@ -402,21 +590,28 @@ document.getElementById('repeat-btn').addEventListener('click', () => {
 //  Search / Filter
 // ─────────────────────────────────────────────────
 document.getElementById('search-input').addEventListener('input', (e) => {
-  const q = e.target.value.toLowerCase().trim();
-  displayedTracks = q
-    ? TRACKS.filter(t => t.name.toLowerCase().includes(q) || t.genre.toLowerCase().includes(q))
-    : [...TRACKS];
-  renderTracks(displayedTracks);
-  // Re-highlight if current track is still in list
-  const inList = displayedTracks.findIndex(t => t.id === (TRACKS[currentIndex] || {}).id);
-  if (inList >= 0) updateTrackListActive(inList);
+  searchQuery = e.target.value.toLowerCase().trim();
+  applyView();
 });
 
 // ─────────────────────────────────────────────────
-//  Like Button
+//  Player-bar Like Button (favorites the now-playing track)
 // ─────────────────────────────────────────────────
 document.getElementById('heart-btn').addEventListener('click', function () {
-  this.classList.toggle('liked');
+  if (playingTrackId == null) return;
+  toggleFav(playingTrackId);
+  syncPlayerHeart();
+  // Reflect in the row heart if visible, and refresh favorites view live
+  const row = document.querySelector(`.row-heart[data-id="${playingTrackId}"]`);
+  if (row) row.classList.toggle('liked', isFav(playingTrackId));
+  if (currentView === 'favorites') applyView();
+});
+
+// ─────────────────────────────────────────────────
+//  Sidebar view switching (Instrumentals / Favorites)
+// ─────────────────────────────────────────────────
+document.querySelectorAll('.playlist-card[data-view]').forEach(card => {
+  card.addEventListener('click', () => switchView(card.dataset.view));
 });
 
 // ─────────────────────────────────────────────────
@@ -449,4 +644,5 @@ function formatTime(sec) {
 //  Init
 // ─────────────────────────────────────────────────
 setVolume(0.7);
-renderTracks(displayedTracks);
+updateFavCount();
+applyView();
