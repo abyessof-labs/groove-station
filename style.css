@@ -831,14 +831,13 @@ body {
   }
   .play-btn-large { width: 56px; height: 56px; }
 
-  /* Track list: hide the # and duration columns to give titles room */
+  /* Track list header: only the Title column on mobile */
   .track-list-header {
-    grid-template-columns: 1fr 40px;
+    grid-template-columns: 1fr;
     padding: 8px 20px;
   }
   .track-list-header .col-num,
   .track-list-header .col-duration { display: none; }
-  .track-list-header::before { content: "Title"; }
 
   .track-divider { margin: 0 20px 4px; }
 
