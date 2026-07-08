@@ -683,6 +683,211 @@ function formatTime(sec) {
 }
 
 // ─────────────────────────────────────────────────
+//  Mobile: bottom nav, search sheet, now-playing sheet
+// ─────────────────────────────────────────────────
+const mobileBottomNav = document.querySelector('.mobile-bottomnav');
+const mobileSearchBtn = document.getElementById('mt-search-btn');
+const mobileSearchSheet = document.getElementById('mobile-search-sheet');
+const mobileSearchClose = document.getElementById('mss-close');
+const mobileSearchInput = document.getElementById('mobile-search-input');
+const desktopSearchInput = document.getElementById('search-input');
+
+// Sync the two search inputs and re-run applyView
+function setSearchQuery(q) {
+  searchQuery = (q || '').toLowerCase().trim();
+  if (desktopSearchInput && desktopSearchInput.value !== q) desktopSearchInput.value = q || '';
+  if (mobileSearchInput && mobileSearchInput.value !== q) mobileSearchInput.value = q || '';
+  applyView();
+}
+
+if (desktopSearchInput) {
+  desktopSearchInput.addEventListener('input', (e) => setSearchQuery(e.target.value));
+}
+if (mobileSearchInput) {
+  mobileSearchInput.addEventListener('input', (e) => setSearchQuery(e.target.value));
+}
+
+function openSearchSheet() {
+  if (!mobileSearchSheet) return;
+  mobileSearchSheet.classList.add('open');
+  mobileSearchSheet.setAttribute('aria-hidden', 'false');
+  setTimeout(() => mobileSearchInput && mobileSearchInput.focus(), 50);
+}
+function closeSearchSheet() {
+  if (!mobileSearchSheet) return;
+  mobileSearchSheet.classList.remove('open');
+  mobileSearchSheet.setAttribute('aria-hidden', 'true');
+}
+if (mobileSearchBtn) mobileSearchBtn.addEventListener('click', openSearchSheet);
+if (mobileSearchClose) mobileSearchClose.addEventListener('click', closeSearchSheet);
+
+// Bottom nav → switches view; "search" opens the search sheet instead of a real view
+if (mobileBottomNav) {
+  mobileBottomNav.querySelectorAll('[data-mbn-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.mbnView;
+      mobileBottomNav.querySelectorAll('.mbn-item').forEach(b => b.classList.remove('active'));
+      if (view === 'search') {
+        // keep previous view underneath, but flag search visually
+        btn.classList.add('active');
+        openSearchSheet();
+        return;
+      }
+      btn.classList.add('active');
+      switchView(view);
+    });
+  });
+}
+
+// ── Expandable now-playing sheet ──
+const npSheet = document.getElementById('np-sheet');
+const npsClose = document.getElementById('nps-close');
+const npsTitle = document.getElementById('nps-title');
+const npsArtist = document.getElementById('nps-artist');
+const npsPlayBtn = document.getElementById('nps-play');
+const npsPlayIcon = document.getElementById('nps-play-icon');
+const npsPrev = document.getElementById('nps-prev');
+const npsNext = document.getElementById('nps-next');
+const npsShuffle = document.getElementById('nps-shuffle');
+const npsRepeat = document.getElementById('nps-repeat');
+const npsHeart = document.getElementById('nps-heart');
+const npsProgressTrack = document.getElementById('nps-progress-track');
+const npsProgressFill = document.getElementById('nps-progress-fill');
+const npsProgressThumb = document.getElementById('nps-progress-thumb');
+const npsCurrentTime = document.getElementById('nps-current-time');
+const npsTotalTime = document.getElementById('nps-total-time');
+
+function openNpSheet() {
+  if (!npSheet) return;
+  if (playingTrackId == null && currentIndex < 0) return; // don't open with nothing
+  npSheet.classList.add('open');
+  npSheet.setAttribute('aria-hidden', 'false');
+  syncNpSheet();
+}
+function closeNpSheet() {
+  if (!npSheet) return;
+  npSheet.classList.remove('open');
+  npSheet.setAttribute('aria-hidden', 'true');
+}
+
+// Tap the mini player (but not its buttons) to expand
+const playerBar = document.querySelector('.player-bar');
+if (playerBar) {
+  playerBar.addEventListener('click', (e) => {
+    // Only handle on mobile; ignore clicks on interactive controls
+    if (window.matchMedia('(min-width: 769px)').matches) return;
+    if (e.target.closest('button')) return;
+    if (e.target.closest('.progress-track')) return;
+    if (e.target.closest('.volume-track')) return;
+    openNpSheet();
+  });
+  // Also allow tap on the artwork/title area explicitly
+  const npInfo = playerBar.querySelector('.now-playing-info');
+  const npArt = playerBar.querySelector('.now-playing-art');
+  [npInfo, npArt].forEach(el => {
+    if (el) el.addEventListener('click', () => {
+      if (window.matchMedia('(min-width: 769px)').matches) return;
+      openNpSheet();
+    });
+  });
+}
+
+if (npsClose) npsClose.addEventListener('click', closeNpSheet);
+
+// Wire sheet transport to existing functions
+if (npsPlayBtn) npsPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+if (npsPrev)    npsPrev.addEventListener('click',   (e) => { e.stopPropagation(); playPrev(); });
+if (npsNext)    npsNext.addEventListener('click',   (e) => { e.stopPropagation(); playNext(); });
+if (npsShuffle) npsShuffle.addEventListener('click',(e) => { e.stopPropagation(); document.getElementById('shuffle-btn').click(); npsShuffle.classList.toggle('active', isShuffle); });
+if (npsRepeat)  npsRepeat.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('repeat-btn').click(); npsRepeat.classList.toggle('active', repeatMode > 0); });
+if (npsHeart)   npsHeart.addEventListener('click',  (e) => {
+  e.stopPropagation();
+  if (playingTrackId == null) return;
+  toggleFav(playingTrackId);
+  syncPlayerHeart();
+  npsHeart.classList.toggle('liked', isFav(playingTrackId));
+  const row = document.querySelector(`.row-heart[data-id="${playingTrackId}"]`);
+  if (row) row.classList.toggle('liked', isFav(playingTrackId));
+  if (currentView === 'favorites') applyView();
+});
+
+// Progress bar in the sheet (tap-to-seek, with touch support)
+function seekOnSheet(clientX) {
+  if (!audio.duration || !npsProgressTrack) return;
+  const rect = npsProgressTrack.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  audio.currentTime = pct * audio.duration;
+}
+if (npsProgressTrack) {
+  let dragging = false;
+  const start = (x) => { dragging = true; seekOnSheet(x); };
+  const move  = (x) => { if (dragging) seekOnSheet(x); };
+  const end   = ()  => { dragging = false; };
+  npsProgressTrack.addEventListener('mousedown', (e) => start(e.clientX));
+  document.addEventListener('mousemove', (e) => move(e.clientX));
+  document.addEventListener('mouseup', end);
+  npsProgressTrack.addEventListener('touchstart', (e) => start(e.touches[0].clientX), { passive: true });
+  npsProgressTrack.addEventListener('touchmove',  (e) => move(e.touches[0].clientX),  { passive: true });
+  npsProgressTrack.addEventListener('touchend',   end);
+}
+
+// Keep the sheet's UI in sync with playback state
+function syncNpSheet() {
+  if (!npSheet) return;
+  const t = playingTrackId != null ? TRACKS.find(x => x.id === playingTrackId) : null;
+  if (t) {
+    if (npsTitle)  npsTitle.textContent  = t.name;
+    if (npsArtist) npsArtist.textContent = t.genre;
+  }
+  if (npsPlayIcon) {
+    npsPlayIcon.innerHTML = isPlaying
+      ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+      : '<path d="M8 5v14l11-7z"/>';
+  }
+  if (npsHeart) {
+    const liked = playingTrackId != null && isFav(playingTrackId);
+    npsHeart.classList.toggle('liked', liked);
+  }
+  if (npsShuffle) npsShuffle.classList.toggle('active', isShuffle);
+  if (npsRepeat)  npsRepeat.classList.toggle('active', repeatMode > 0);
+}
+
+// Update sheet progress on timeupdate too
+audio.addEventListener('timeupdate', () => {
+  if (!audio.duration) return;
+  const pct = (audio.currentTime / audio.duration) * 100;
+  if (npsProgressFill)  npsProgressFill.style.width = pct + '%';
+  if (npsProgressThumb) npsProgressThumb.style.left = pct + '%';
+  if (npsCurrentTime)   npsCurrentTime.textContent = formatTime(audio.currentTime);
+});
+audio.addEventListener('loadedmetadata', () => {
+  if (npsTotalTime) npsTotalTime.textContent = formatTime(audio.duration);
+});
+audio.addEventListener('play',  syncNpSheet);
+audio.addEventListener('pause', syncNpSheet);
+
+// Re-sync sheet whenever the now-playing changes
+const _origUpdateNowPlaying = updateNowPlaying;
+updateNowPlaying = function (track) {
+  _origUpdateNowPlaying(track);
+  syncNpSheet();
+};
+
+// Sync the mobile bottom-nav active state when views switch (e.g. via desktop sidebar)
+const _origSwitchView = switchView;
+switchView = function (view) {
+  _origSwitchView(view);
+  const nav = document.querySelector('.mobile-bottomnav');
+  if (!nav) return;
+  nav.querySelectorAll('.mbn-item').forEach(b => {
+    const v = b.dataset.mbnView;
+    // Search button never becomes "the view" — it's an overlay trigger only
+    if (v === 'search') { b.classList.remove('active'); return; }
+    b.classList.toggle('active', v === view);
+  });
+};
+
+// ─────────────────────────────────────────────────
 //  Init
 // ─────────────────────────────────────────────────
 setVolume(0.7);

@@ -725,3 +725,376 @@ body {
   margin: 0 0 6px;
 }
 .empty-state p { margin: 0; font-size: var(--text-sm); }
+
+/* ──────────────────────────────
+   Desktop-only defaults for mobile elements
+   ────────────────────────────── */
+.mobile-topbar,
+.mobile-bottomnav,
+.mobile-search-sheet,
+.np-sheet { display: none; }
+
+/* ──────────────────────────────
+   Mobile layout (<= 768px)
+   ────────────────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --player-h: 68px;
+    --bottomnav-h: 56px;
+    --topbar-h: 52px;
+  }
+
+  html, body { overflow: hidden; }
+
+  /* Rework the grid: single column, top bar + main + mini-player + bottom nav */
+  body {
+    grid-template-columns: 1fr;
+    grid-template-rows:
+      calc(var(--topbar-h) + env(safe-area-inset-top))
+      1fr
+      var(--player-h)
+      calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
+    grid-template-areas:
+      "topbar"
+      "main"
+      "player"
+      "bottomnav";
+  }
+
+  /* Hide desktop sidebar entirely on mobile */
+  .sidebar { display: none; }
+
+  /* Mobile top bar */
+  .mobile-topbar {
+    display: flex;
+    grid-area: topbar;
+    align-items: center;
+    justify-content: space-between;
+    padding: env(safe-area-inset-top) 16px 0;
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    background: #000;
+    border-bottom: 1px solid var(--border);
+    z-index: 20;
+  }
+  .mt-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 16px;
+    letter-spacing: -0.02em;
+  }
+  .mt-search-btn {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+  }
+
+  /* Main content */
+  .main {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    background: linear-gradient(180deg, #1a3a2a 0%, var(--bg-base) 260px);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide desktop header (back/fwd + search) on mobile — replaced by top bar */
+  .main-header { display: none; }
+
+  /* Hero banner — stack vertically, cover art shrinks and centers */
+  .hero-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 20px 20px;
+  }
+  .hero-art {
+    width: min(60vw, 200px);
+    height: min(60vw, 200px);
+    align-self: center;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  }
+  .hero-art svg { width: 100%; height: 100%; }
+  .hero-info { width: 100%; }
+  .hero-title {
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+    line-height: 1.05;
+  }
+  .hero-desc { font-size: 14px; }
+  .hero-meta { font-size: 13px; flex-wrap: wrap; }
+
+  /* Controls bar */
+  .controls-bar {
+    padding: 8px 20px 16px;
+    gap: 16px;
+    position: static;
+  }
+  .play-btn-large { width: 56px; height: 56px; }
+
+  /* Track list: hide the # and duration columns to give titles room */
+  .track-list-header {
+    grid-template-columns: 1fr 40px;
+    padding: 8px 20px;
+  }
+  .track-list-header .col-num,
+  .track-list-header .col-duration { display: none; }
+  .track-list-header::before { content: "Title"; }
+
+  .track-divider { margin: 0 20px 4px; }
+
+  .track-list { padding: 0 8px 24px; }
+
+  .track-item {
+    grid-template-columns: 32px 1fr 44px 48px;
+    gap: 8px;
+    padding: 10px 12px;
+    min-height: 56px;
+  }
+  .track-num { font-size: 14px; width: 24px; }
+  .track-name { font-size: 15px; white-space: normal; line-height: 1.25; }
+  .track-genre { font-size: 12px; white-space: normal; line-height: 1.2; }
+  /* Always show the heart on mobile (no hover on touch) */
+  .row-heart { opacity: 1; width: 40px; height: 40px; }
+  .row-heart svg { width: 20px; height: 20px; }
+  .track-duration { font-size: 12px; }
+
+  /* Mini player bar (docked above bottom nav) */
+  .player-bar {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto;
+    gap: 8px;
+    padding: 6px 12px;
+    height: var(--player-h);
+    border-top: 1px solid var(--border);
+    /* On mobile, the player is a tappable "expand" target for the now-playing sheet */
+    cursor: pointer;
+  }
+  .player-left {
+    gap: 10px;
+    grid-column: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .now-playing-art { width: 44px; height: 44px; }
+  .now-playing-art svg { width: 44px; height: 44px; }
+  .np-title {
+    font-size: 14px;
+    max-width: none;
+  }
+  .np-artist { font-size: 12px; }
+
+  /* Hide the row-heart in the mini player — heart lives in expanded sheet */
+  .player-left .heart-btn { display: none; }
+
+  /* Mini player: show a compact play/pause + next on the right, hide center + volume */
+  .player-center {
+    grid-column: 2;
+    min-width: 0;
+    max-width: none;
+    flex-direction: row;
+    gap: 4px;
+  }
+  .player-center .progress-row { display: none; }
+  .player-center .transport { gap: 4px; }
+  /* Hide prev, keep play + next for one-thumb use */
+  #prev-btn { display: none; }
+  .transport-play { width: 40px; height: 40px; }
+  .transport-play svg { width: 22px; height: 22px; }
+  .transport-btn { width: 40px; height: 40px; }
+  .transport-btn svg { width: 22px; height: 22px; }
+
+  /* Hide desktop volume controls entirely on mobile (phones control via hardware) */
+  .player-right { display: none; }
+
+  /* Bottom nav */
+  .mobile-bottomnav {
+    display: grid;
+    grid-area: bottomnav;
+    grid-template-columns: repeat(3, 1fr);
+    background: #000;
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 20;
+  }
+  .mbn-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    min-height: 56px;
+  }
+  .mbn-item svg { display: block; }
+  .mbn-item.active { color: var(--text-primary); }
+  .mbn-item.active svg { color: var(--accent); }
+
+  /* Mobile search sheet (full-screen overlay) */
+  .mobile-search-sheet {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg-base);
+    z-index: 200;
+    padding: env(safe-area-inset-top) max(12px, env(safe-area-inset-left)) 0 max(12px, env(safe-area-inset-right));
+    flex-direction: column;
+  }
+  .mobile-search-sheet.open { display: flex; }
+  .mss-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+  }
+  .mss-close {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+  }
+  .mss-bar input {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid transparent;
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+    padding: 12px 16px;
+    font-size: 16px; /* prevent iOS zoom on focus */
+    outline: none;
+  }
+  .mss-bar input:focus { border-color: var(--accent); background: rgba(255,255,255,0.12); }
+
+  /* Expanded now-playing sheet */
+  .np-sheet {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, #1e3a2b 0%, var(--bg-base) 60%);
+    z-index: 300;
+    padding:
+      calc(env(safe-area-inset-top) + 8px)
+      max(20px, env(safe-area-inset-right))
+      calc(env(safe-area-inset-bottom) + 16px)
+      max(20px, env(safe-area-inset-left));
+    flex-direction: column;
+    gap: 24px;
+    animation: nps-slide-up 220ms ease-out;
+  }
+  .np-sheet.open { display: flex; }
+  @keyframes nps-slide-up {
+    from { transform: translateY(100%); opacity: 0.5; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .nps-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .nps-close {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+  }
+  .nps-context {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    flex: 1;
+    text-align: center;
+  }
+  .nps-spacer { width: 44px; height: 44px; }
+
+  .nps-art {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: 46vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .nps-art svg { width: 100%; height: 100%; display: block; }
+
+  .nps-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nps-title {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1.15;
+  }
+  .nps-artist {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .nps-progress { display: flex; flex-direction: column; gap: 6px; }
+  .nps-progress .progress-track { height: 6px; }
+  .nps-progress .progress-track:hover { height: 8px; }
+  .nps-progress .progress-thumb { width: 14px; height: 14px; opacity: 1; }
+  .nps-times {
+    display: flex;
+    justify-content: space-between;
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .nps-controls {
+    display: grid;
+    grid-template-columns: 44px 1fr 72px 1fr 44px;
+    align-items: center;
+    justify-items: center;
+    gap: 8px;
+  }
+  .nps-transport {
+    width: 56px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-primary);
+    border-radius: var(--radius-full);
+  }
+  .nps-play {
+    width: 72px; height: 72px;
+    background: var(--text-primary);
+    color: #000;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-full);
+    transition: transform var(--transition), background var(--transition);
+  }
+  .nps-play:active { transform: scale(0.95); }
+
+  .nps-footer {
+    display: flex;
+    justify-content: center;
+  }
+  #nps-heart {
+    width: 48px; height: 48px;
+  }
+  #nps-heart svg { width: 24px; height: 24px; }
+  #nps-heart.liked { color: var(--accent); }
+  #nps-heart.liked svg { fill: var(--accent); stroke: var(--accent); }
+
+  /* Empty state on mobile */
+  .empty-state { padding: 40px 20px; }
+
+  /* Larger min tap target for any icon-btn on mobile */
+  .icon-btn { width: 44px; height: 44px; }
+}
+
+/* Prevent iOS from zooming input focus even on desktop-derived UIs */
+@media (max-width: 768px) {
+  input, textarea, select { font-size: 16px; }
+}
