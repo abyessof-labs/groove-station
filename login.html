@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Groove Station — Sign in</title>
+  <link rel="icon" type="image/png" href="cover-96.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="login-body">
+  <main class="login-card">
+    <img class="login-cover" src="cover.png" alt="Groove Station" />
+    <h1 class="login-title">Groove Station</h1>
+    <p class="login-sub">Enter the passphrase to continue.</p>
+    <form id="login-form" autocomplete="off">
+      <input type="password" id="pass" class="login-input" placeholder="Passphrase" autocomplete="current-password" required />
+      <button type="submit" id="login-btn" class="login-btn">Sign in</button>
+      <p class="login-error" id="login-error" hidden>Wrong passphrase — try again.</p>
+    </form>
+  </main>
+  <script src="login.js"></script>
+</body>
+</html>

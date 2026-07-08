@@ -1,11 +1,13 @@
 // ─────────────────────────────────────────────────
 //  Audio Source
 // ─────────────────────────────────────────────────
-// Tracks stream directly from the public S3 bucket. `key` is the EXACT
-// S3 object key under Instrumental/ (some contain mojibake from upload —
-// they must match S3 byte-for-byte). Audio is never bundled into the deploy.
-const AUDIO_BASE = 'https://groovestationmacro.s3.ca-central-1.amazonaws.com/Instrumental/';
-function trackUrl(key) { return AUDIO_BASE + encodeURIComponent(key); }
+// Audio is gated behind a passphrase: boot() posts the saved session token to
+// the login API, which returns short-lived S3 pre-signed URLs. `key` is the
+// EXACT S3 object key under Instrumental/ (some contain mojibake) and must match
+// S3 byte-for-byte. SIGNED maps key -> pre-signed URL (populated in boot()).
+const LOGIN_ENDPOINT = 'https://lnion9r8xf.execute-api.ca-central-1.amazonaws.com';
+let SIGNED = {};
+function trackUrl(key) { return SIGNED[key] || ''; }
 
 // ─────────────────────────────────────────────────
 //  Track Library
@@ -890,7 +892,43 @@ switchView = function (view) {
 // ─────────────────────────────────────────────────
 //  Init
 // ─────────────────────────────────────────────────
-setVolume(0.7);
-updateFavCount();
-applyView();
-setupMediaSession();
+async function boot() {
+  const token = localStorage.getItem('gs_token');
+  const until = Number(localStorage.getItem('gs_authed_until') || 0);
+  // No/expired session → send them to the passphrase page.
+  if (!token || until * 1000 < Date.now()) { location.replace('./login.html'); return; }
+  try {
+    const res = await fetch(LOGIN_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    if (res.status === 401) {
+      // Session rejected (e.g. secret rotated) → re-authenticate.
+      localStorage.removeItem('gs_token');
+      localStorage.removeItem('gs_authed_until');
+      location.replace('./login.html');
+      return;
+    }
+    if (!res.ok) throw new Error('sign_failed');
+    const data = await res.json();
+    SIGNED = data.urls || {};
+    // The API may hand back a refreshed token; keep the 30-day window rolling.
+    if (data.token) {
+      localStorage.setItem('gs_token', data.token);
+      localStorage.setItem('gs_authed_until', String(data.expires));
+    }
+  } catch (e) {
+    document.body.insertAdjacentHTML('afterbegin',
+      '<div style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;' +
+      'justify-content:center;text-align:center;padding:24px;background:var(--bg-base,#121212);' +
+      'color:var(--text-primary,#fff);font-family:system-ui">Couldn’t load audio right now.' +
+      ' Check your connection and refresh.</div>');
+    return;
+  }
+  setVolume(0.7);
+  updateFavCount();
+  applyView();
+  setupMediaSession();
+}
+boot();

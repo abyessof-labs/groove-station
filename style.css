@@ -1097,3 +1097,66 @@ body {
 @media (max-width: 768px) {
   input, textarea, select { font-size: 16px; }
 }
+
+/* ──────────────────────────────────────────────
+   Login page (login.html)
+────────────────────────────────────────────── */
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: radial-gradient(120% 120% at 50% 0%, #1a3a2a 0%, var(--bg-base) 60%);
+  overflow: auto;
+}
+.login-card {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.login-cover {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  object-fit: cover;
+}
+.login-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--text-xl);
+  letter-spacing: -0.02em;
+}
+.login-sub { color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: 6px; }
+#login-form { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.login-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+  font-size: 16px;
+  outline: none;
+  transition: border-color var(--transition), background var(--transition);
+}
+.login-input:focus { border-color: var(--accent); background: rgba(255,255,255,0.12); }
+.login-input::placeholder { color: var(--text-muted); }
+.login-btn {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  transition: transform var(--transition), background var(--transition);
+}
+.login-btn:hover { background: var(--accent-hover); transform: scale(1.02); }
+.login-btn:disabled { opacity: 0.7; cursor: default; transform: none; }
+.login-error { color: #ff6b6b; font-size: var(--text-sm); margin-top: 2px; }
