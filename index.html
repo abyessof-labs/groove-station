@@ -307,6 +307,19 @@
   </nav>
 
   <audio id="audio-engine" preload="none"></audio>
+  <script>
+    // Turn the sticky header/controls opaque once scrolled past the green glow,
+    // so track rows don't show through them.
+    (function () {
+      var main = document.querySelector('.main');
+      if (!main) return;
+      var update = function () {
+        main.classList.toggle('is-scrolled', main.scrollTop > 180);
+      };
+      main.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+  </script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -177,7 +177,22 @@ body {
 .main {
   grid-area: main;
   overflow-y: auto;
-  background: linear-gradient(180deg, #1a3a2a 0%, var(--bg-base) 340px);
+  background: var(--bg-base);
+  position: relative;
+}
+
+/* Green glow sits in the scroll flow so it scrolls away with the content,
+   instead of being a fixed backdrop the sticky bars float on top of. */
+.main::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 340px;
+  background: linear-gradient(180deg, #1a3a2a 0%, var(--bg-base) 100%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* ──────────────────────────────────────────────
@@ -192,6 +207,7 @@ body {
   top: 0;
   z-index: 10;
   background: transparent;
+  transition: background var(--transition), box-shadow var(--transition);
 }
 
 .header-nav { display: flex; gap: 8px; }
@@ -302,10 +318,22 @@ body {
   align-items: center;
   gap: 20px;
   padding: 24px 24px 16px;
-  background: var(--bg-base);
+  background: transparent;
   position: sticky;
   top: 64px;
   z-index: 9;
+  transition: background var(--transition);
+}
+
+/* Once the page is scrolled, the green glow has scrolled past the sticky
+   bars, so make them opaque to cover the track rows passing underneath. */
+.main.is-scrolled .main-header {
+  background: var(--bg-base);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.main.is-scrolled .controls-bar {
+  background: var(--bg-base);
 }
 
 .play-btn-large {
@@ -794,9 +822,10 @@ body {
   .main {
     padding-left: max(0px, env(safe-area-inset-left));
     padding-right: max(0px, env(safe-area-inset-right));
-    background: linear-gradient(180deg, #1a3a2a 0%, var(--bg-base) 260px);
+    background: var(--bg-base);
     -webkit-overflow-scrolling: touch;
   }
+  .main::before { height: 260px; }
 
   /* Hide desktop header (back/fwd + search) on mobile — replaced by top bar */
   .main-header { display: none; }
