@@ -169,6 +169,54 @@ const TRACKS = [
     name: 'Daughters (Acoustic Karaoke)',
     genre: 'John Mayer · Karaoke / Instrumental',
   },
+  {
+    id: 27,
+    key: '1 - John Mayer - “Neon” Official Isolated Guitar Instrumental.m4a',
+    name: 'Neon (Isolated Guitar)',
+    genre: 'John Mayer · Isolated Guitar',
+  },
+  {
+    id: 28,
+    key: '2 - John Mayer - “Stop This Train” Official Isolated Guitar Instrumental.m4a',
+    name: 'Stop This Train (Isolated Guitar)',
+    genre: 'John Mayer · Isolated Guitar',
+  },
+  {
+    id: 29,
+    key: '3 - John Mayer - “In Your Atmosphere” Official Isolated Guitar Instrumental.m4a',
+    name: 'In Your Atmosphere (Isolated Guitar)',
+    genre: 'John Mayer · Isolated Guitar',
+  },
+  {
+    id: 30,
+    key: '4 - John Mayer - “Daughters” Official Isolated Guitar Instrumental.m4a',
+    name: 'Daughters (Isolated Guitar)',
+    genre: 'John Mayer · Isolated Guitar',
+  },
+  {
+    id: 31,
+    key: '5 - John Mayer - “Free Fallin’” Official Isolated Guitar Instrumental.m4a',
+    name: 'Free Fallin\' (Isolated Guitar)',
+    genre: 'John Mayer · Isolated Guitar',
+  },
+  {
+    id: 32,
+    key: '6 - John Mayer - “Slow Dancing in a Burning Room” Isolated Guitar and Vocal (Where The Light Is Version).m4a',
+    name: 'Slow Dancing in a Burning Room (Isolated Guitar & Vocal)',
+    genre: 'John Mayer · Where the Light Is',
+  },
+  {
+    id: 33,
+    key: '7 - John Mayer - “Bold As Love” Official Isolated Guitar Instrumental.m4a',
+    name: 'Bold As Love (Isolated Guitar)',
+    genre: 'John Mayer · Isolated Guitar',
+  },
+  {
+    id: 34,
+    key: '8 - John Mayer - “Gravity” Isolated Guitar and Vocal (Where The Light Is Version).m4a',
+    name: 'Gravity (Isolated Guitar & Vocal)',
+    genre: 'John Mayer · Where the Light Is',
+  },
 ];
 
 // ─────────────────────────────────────────────────
