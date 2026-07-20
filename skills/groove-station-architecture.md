@@ -30,8 +30,8 @@ no build step and no server-side rendering — just static files (`index.html`, 
 
 | Item | Detail |
 |------|--------|
-| GitHub repo | `https://github.com/afossey-tech/groove-station` (private) |
-| GitHub user | `afossey-tech` |
+| GitHub repo | `https://github.com/abyessof-labs/groove-station` (private) |
+| GitHub owner | `abyessof-labs` |
 | Git identity | `Anthony Fossey <afossey@macrostudios.ca>` |
 | Audio bucket | `s3://groovestationmacro/Instrumental/` |
 | AWS account (audio + Lambda) | `791327541706`, region `ca-central-1` |
@@ -79,7 +79,7 @@ just a redeploy, with no Lambda change.)
 
 1. **Push code to GitHub.** The repo is the source of truth for the code. After editing
    `app.js` / `index.html` / `style.css` / `login.*`, commit and push to
-   `afossey-tech/groove-station`.
+   `abyessof-labs/groove-station`.
 2. **Redeploy the static site.** Pushing to GitHub does **not** update the live site by
    itself; the site must be redeployed from the current code.
 
